@@ -1,0 +1,23 @@
+branch: main
+# check:
+#   - CKV_AWS_18
+compact: false
+directory:
+  - .
+download-external-modules: true
+evaluate-variables: true
+external-modules-download-path: .external_modules
+framework:
+output: cli 
+quiet: true 
+skip-check: 
+  - CKV_DOCKER_3 
+  - CKV_DOCKER_2 
+skip-framework:
+  - dockerfile
+  - secrets
+  - sca_image
+  - sca_package
+  - sast
+  - cdk
+soft-fail: true

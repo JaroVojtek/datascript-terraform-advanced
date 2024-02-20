@@ -1,0 +1,7 @@
+[severity]
+level = "medium"
+[rules]
+    skip-rules = [
+        "AC-K8-OE-PK-M-0155"
+    ]
+    scan-rules = [] 
