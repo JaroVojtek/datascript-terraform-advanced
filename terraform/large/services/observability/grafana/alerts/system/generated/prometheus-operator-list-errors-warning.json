@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "prometheus-operator",
+  "title": "prometheus-operator-list-errors-warning",
+  "condition": "B",
+  "for": "15m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "description": "Errors while performing List operations in controller {{$labels.controller}} in {{$labels.namespace}} namespace.",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/prometheus-operator/prometheusoperatorlisterrors",
+    "summary": "Errors while performing list operations in controller."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(\n  sum by (controller,namespace,cluster) (rate(prometheus_operator_list_operations_failed_total{job=\"prometheus-operator\",namespace=\"monitoring\"}[10m]))\n  /\n  sum by (controller,namespace,cluster) (rate(prometheus_operator_list_operations_total{job=\"prometheus-operator\",namespace=\"monitoring\"}[10m]))\n) \u003e 0.4\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

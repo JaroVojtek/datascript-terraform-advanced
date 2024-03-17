@@ -1,0 +1,136 @@
+{
+  "id": 640,
+  "uid": "cert-manager-hitting-rate-limits-critical",
+  "orgID": 1,
+  "folderUID": "system",
+  "ruleGroup": "cert-manager",
+  "title": "cert-manager-hitting-rate-limits-critical",
+  "condition": "C",
+  "data": [
+    {
+      "refId": "A",
+      "queryType": "",
+      "relativeTimeRange": {
+        "from": 300,
+        "to": 0
+      },
+      "datasourceUid": "thanos",
+      "model": {
+        "editorMode": "code",
+        "expr": "sum by (host) (rate(certmanager_http_acme_client_request_count{status=\"419\"}[5m]))",
+        "hide": false,
+        "intervalMs": 1000,
+        "legendFormat": "__auto",
+        "maxDataPoints": 43200,
+        "range": true,
+        "refId": "A"
+      }
+    },
+    {
+      "refId": "B",
+      "queryType": "",
+      "relativeTimeRange": {
+        "from": 300,
+        "to": 0
+      },
+      "datasourceUid": "-100",
+      "model": {
+        "conditions": [
+          {
+            "evaluator": {
+              "params": [
+                3
+              ],
+              "type": "gt"
+            },
+            "operator": {
+              "type": "and"
+            },
+            "query": {
+              "params": [
+                "A"
+              ]
+            },
+            "reducer": {
+              "params": [],
+              "type": "last"
+            },
+            "type": "query"
+          }
+        ],
+        "datasource": {
+          "type": "__expr__",
+          "uid": "-100"
+        },
+        "downsampler": "mean",
+        "expression": "A",
+        "hide": false,
+        "intervalMs": 1000,
+        "maxDataPoints": 43200,
+        "reducer": "sum",
+        "refId": "B",
+        "type": "reduce",
+        "upsampler": "fillna"
+      }
+    },
+    {
+      "refId": "C",
+      "queryType": "",
+      "relativeTimeRange": {
+        "from": 600,
+        "to": 0
+      },
+      "datasourceUid": "-100",
+      "model": {
+        "conditions": [
+          {
+            "evaluator": {
+              "params": [
+                0,
+                0
+              ],
+              "type": "gt"
+            },
+            "operator": {
+              "type": "and"
+            },
+            "query": {
+              "params": [
+                "C"
+              ]
+            },
+            "reducer": {
+              "params": [],
+              "type": "avg"
+            },
+            "type": "query"
+          }
+        ],
+        "datasource": {
+          "name": "Expression",
+          "type": "__expr__",
+          "uid": "__expr__"
+        },
+        "expression": "$B > 0",
+        "hide": false,
+        "intervalMs": 1000,
+        "maxDataPoints": 43200,
+        "refId": "C",
+        "type": "math"
+      }
+    }
+  ],
+  "updated": "2023-02-08T22:13:40Z",
+  "noDataState": "OK",
+  "execErrState": "Error",
+  "for": "5m",
+  "annotations": {
+    "__dashboardUid__": "cert-manager",
+    "__panelId__": "39",
+    "description": "Depending on the rate limit, the cert-manager may be unable to generate certificates for up to a week.",
+    "summary": "Cert manager hitting LetsEncrypt rate limits."
+  },
+  "labels": {
+    "severity": "critical"
+  }
+}

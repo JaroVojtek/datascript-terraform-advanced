@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "prometheus-k8s-prometheus",
+  "title": "prometheus-not-ingesting-samples-warning",
+  "condition": "B",
+  "for": "10m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "description": "Prometheus {{$labels.namespace}}/{{$labels.pod}} is not ingesting samples.",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheusnotingestingsamples",
+    "summary": "Prometheus is not ingesting samples."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(\n  rate(prometheus_tsdb_head_samples_appended_total{job=\"prometheus-k8s\",namespace=\"monitoring\"}[5m]) \u003c= 0\nand\n  (\n    sum without(scrape_job) (prometheus_target_metadata_cache_entries{job=\"prometheus-k8s\",namespace=\"monitoring\"}) \u003e 0\n  or\n    sum without(rule_group) (prometheus_rule_group_rules{job=\"prometheus-k8s\",namespace=\"monitoring\"}) \u003e 0\n  )\n)\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

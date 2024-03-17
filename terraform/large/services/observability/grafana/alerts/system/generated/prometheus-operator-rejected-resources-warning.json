@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "prometheus-operator",
+  "title": "prometheus-operator-rejected-resources-warning",
+  "condition": "B",
+  "for": "5m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "description": "{{ if $values.B }}Prometheus operator in {{ $labels.namespace }} namespace rejected {{ printf \"%0.0f\" $values.B.Value }} {{ $labels.controller }}/{{ $labels.resource }} resources.{{ end }}",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/prometheus-operator/prometheusoperatorrejectedresources",
+    "summary": "Resources rejected by Prometheus operator"
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "min_over_time(prometheus_operator_managed_resources{state=\"rejected\",job=\"prometheus-operator\",namespace=\"monitoring\"}[5m]) \u003e 0\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

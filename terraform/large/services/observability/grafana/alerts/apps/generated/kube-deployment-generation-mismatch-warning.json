@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "kubernetes-monitoring",
+  "title": "kube-deployment-generation-mismatch-warning",
+  "condition": "B",
+  "for": "15m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "description": "Deployment generation for {{ $labels.namespace }}/{{ $labels.deployment }} does not match, this indicates that the Deployment has failed but has not been rolled back.",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubedeploymentgenerationmismatch",
+    "summary": "Deployment generation mismatch due to possible roll-back"
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(\n  kube_deployment_status_observed_generation{job=\"kube-state-metrics\"} != kube_deployment_metadata_generation{job=\"kube-state-metrics\"}\n) and on (cluster, namespace, deployment) kube_deployment_labels{label_monitoring_scope=\"apps\"}\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

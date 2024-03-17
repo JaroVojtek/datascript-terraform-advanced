@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "kubernetes-monitoring",
+  "title": "kubelet-server-certificate-expiration-critical",
+  "condition": "B",
+  "for": "5m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "critical"
+  },
+  "annotations": {
+    "description": "{{ if $values.B }}Server certificate for Kubelet on node {{ $labels.node }} expires in {{ $values.B.Value | humanizeDuration }}.{{ end }}",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeletservercertificateexpiration",
+    "summary": "Kubelet server certificate is about to expire."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "kubelet_certificate_manager_server_ttl_seconds \u003c 86400\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

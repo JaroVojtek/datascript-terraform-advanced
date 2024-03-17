@@ -1,0 +1,35 @@
+{
+  "ruleGroup": "kubernetes-monitoring",
+  "title": "kube-apierror-budget-burn-warning",
+  "condition": "B",
+  "for": "3h",
+  "noDataState": "OK",
+  "labels": {
+    "long": "3d",
+    "severity": "warning",
+    "short": "6h"
+  },
+  "annotations": {
+    "description": "The API server is burning too much error budget.",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeapierrorbudgetburn",
+    "summary": "The API server is burning too much error budget."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "sum(apiserver_request:burnrate3d) \u003e (1.00 * 0.01000)\nand\nsum(apiserver_request:burnrate6h) \u003e (1.00 * 0.01000)\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

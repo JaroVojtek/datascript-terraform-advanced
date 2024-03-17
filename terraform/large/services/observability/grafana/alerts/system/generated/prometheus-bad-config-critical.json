@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "prometheus-k8s-prometheus",
+  "title": "prometheus-bad-config-critical",
+  "condition": "B",
+  "for": "10m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "critical"
+  },
+  "annotations": {
+    "description": "Prometheus {{$labels.namespace}}/{{$labels.pod}} has failed to reload its configuration.",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheusbadconfig",
+    "summary": "Failed Prometheus configuration reload."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "# Without max_over_time, failed scrapes could create false negatives, see\n# https://www.robustperception.io/alerting-on-gauges-in-prometheus-2-0 for details.\nmax_over_time(prometheus_config_last_reload_successful{job=\"prometheus-k8s\",namespace=\"monitoring\"}[5m]) == 0\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "ruleGroup": "node-exporter",
+  "title": "node-file-descriptor-limit-warning",
+  "condition": "B",
+  "for": "15m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "__dashboardUid__": "k8s-cluster-node",
+    "__panelId__": "206",
+    "description": "{{ if $values.B }}File descriptors limit at {{ $labels.instance }} is currently at {{ printf \"%.2f\" $values.B.Value }}%.{{ end }}",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/node/nodefiledescriptorlimit",
+    "summary": "Kernel is predicted to exhaust file descriptors limit soon."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(\n  node_filefd_allocated{job=\"node-exporter\"} * 100 / node_filefd_maximum{job=\"node-exporter\"} \u003e 70\n)\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

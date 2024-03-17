@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "kubernetes-monitoring",
+  "title": "kube-version-mismatch-warning",
+  "condition": "B",
+  "for": "15m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "description": "{{ if $values.B }}There are {{ $values.B.Value }} different semantic versions of Kubernetes components running.{{ end }}",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeversionmismatch",
+    "summary": "Different semantic versions of Kubernetes components running."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "count by (cluster) (count by (git_version, cluster) (label_replace(kubernetes_build_info{job!~\"kube-dns|coredns\"},\"git_version\",\"$1\",\"git_version\",\"(v[0-9]*.[0-9]*).*\"))) \u003e 1\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

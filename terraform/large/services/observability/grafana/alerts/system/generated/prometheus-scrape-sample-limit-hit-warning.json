@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "prometheus-k8s-prometheus",
+  "title": "prometheus-scrape-sample-limit-hit-warning",
+  "condition": "B",
+  "for": "15m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "description": "{{ if $values.B }}Prometheus {{$labels.namespace}}/{{$labels.pod}} has failed {{ printf \"%.0f\" $values.B.Value }} scrapes in the last 5m because some targets exceeded the configured sample_limit.{{ end }}",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheusscrapesamplelimithit",
+    "summary": "Prometheus has failed scrapes that have exceeded the configured sample limit."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "increase(prometheus_target_scrapes_exceeded_sample_limit_total{job=\"prometheus-k8s\",namespace=\"monitoring\"}[5m]) \u003e 0\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "prometheus-k8s-prometheus",
+  "title": "prometheus-target-sync-failure-critical",
+  "condition": "B",
+  "for": "5m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "critical"
+  },
+  "annotations": {
+    "description": "{{ if $values.B }}{{ printf \"%.0f\" $values.B.Value }} targets in Prometheus {{$labels.namespace}}/{{$labels.pod}} have failed to sync because invalid configuration was supplied.{{ end }}",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheustargetsyncfailure",
+    "summary": "Prometheus has failed to sync targets."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "increase(prometheus_target_sync_failed_total{job=\"prometheus-k8s\",namespace=\"monitoring\"}[30m]) \u003e 0\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

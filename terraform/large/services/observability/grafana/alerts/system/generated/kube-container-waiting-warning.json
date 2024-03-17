@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "kubernetes-monitoring",
+  "title": "kube-container-waiting-warning",
+  "condition": "B",
+  "for": "1h",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "description": "pod/{{ $labels.pod }} in namespace {{ $labels.namespace }} on container {{ $labels.container}} has been in waiting state for longer than 1 hour.",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubecontainerwaiting",
+    "summary": "Pod container waiting longer than 1 hour"
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(\n  kube_pod_container_status_waiting_reason{reason=\"ContainerCreating\"} \u003e 0\n) and on (cluster, namespace, pod, container) kube_pod_labels{label_monitoring_scope=\"system\"}\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

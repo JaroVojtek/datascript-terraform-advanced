@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "kubernetes-monitoring",
+  "title": "kube-persistent-volume-filling-up-warning",
+  "condition": "B",
+  "for": "1h",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "description": "{{ if $values.B }}Based on recent sampling, the PersistentVolume claimed by {{ $labels.persistentvolumeclaim }} in Namespace {{ $labels.namespace }} is expected to fill up within four days. Currently {{ $values.B.Value | humanizePercentage }} is available.{{ end }}",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubepersistentvolumefillingup",
+    "summary": "PersistentVolume is filling up."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(\n  (\n    (\n      kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\"}\n      /\n      kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\"}\n    ) \u003c 0.15\n  ) and (\n    kubelet_volume_stats_used_bytes{job=\"kubelet\", metrics_path=\"/metrics\"} \u003e 0\n  ) and (\n    predict_linear(kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\"}[6h], 4 * 24 * 3600) \u003c 0\n  )\n  unless on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_access_mode{access_mode=\"ReadOnlyMany\"} == 1\n  unless on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_labels{label_excluded_from_alerts=\"true\"} == 1\n) and on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_labels{label_monitoring_scope=\"apps\"}\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

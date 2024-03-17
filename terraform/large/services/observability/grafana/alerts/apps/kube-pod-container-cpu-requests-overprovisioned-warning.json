@@ -1,0 +1,34 @@
+{
+  "ruleGroup": "kube-pod-container",
+  "title": "kube-pod-container-cpu-requests-overprovisioned-warning",
+  "condition": "B",
+  "noDataState": "OK",
+  "for": "1d",
+  "annotations": {
+    "description": "Pod container CPU usage has been lower than 30% of requested CPU requests for longer than 1 day.",
+    "summary": "Pod container CPU requests should be decreased.",
+    "__dashboardUid__": "k8s-container",
+    "__panelId__": 20
+  },
+  "labels": {
+    "severity": "warning"
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "((rate(container_cpu_user_seconds_total{container!=\"POD\",container!=\"\"}[5m]) * 100 / on (cluster, namespace, pod, container) group_left kube_pod_container_resource_requests{container!=\"POD\",container!=\"\",resource=\"cpu\",unit=\"core\"}) < 30) and on(cluster, namespace, pod) kube_pod_labels{label_monitoring_scope=\"apps\"}"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

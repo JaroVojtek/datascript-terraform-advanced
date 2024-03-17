@@ -1,0 +1,37 @@
+{
+  "ruleGroup": "kube-prometheus",
+  "title": "target-down-warning",
+  "condition": "B",
+  "for": "10m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "description": "{{ if $values.B }}{{ printf \"%.4g\" $values.B.Value }}% of the {{ $labels.job }}/{{ $labels.service }} targets in {{ $labels.namespace }} namespace are down.{{ end }}",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/general/targetdown",
+    "summary": "One or more targets are unreachable."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "relativeTimeRange": {
+        "from": 120,
+        "to": 0
+      },
+      "model": {
+        "expr": "(\n  100 * (count(up == 0) by (job, namespace, service, cluster))\n  /\n  count(up) by (job, namespace, service, cluster)\n) \u003e 10\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

@@ -1,0 +1,823 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Rabbitmq stats using RabbitMQ Exporter (https://github.com/kbudde/rabbitmq_exporter)",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "gnetId": 4279,
+  "graphTooltip": 1,
+  "id": 63,
+  "iteration": 1654585399801,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": null,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 7,
+      "title": "rabbitmq_cluster",
+      "type": "row"
+    },
+    {
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 18,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 1
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [
+            "min",
+            "max",
+            "mean",
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "exemplar": true,
+          "expr": "max(rabbitmq_channels{cluster=\"$Cluster\", rabbitmq_cluster=\"$RabbitMQ\"})",
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "Channels",
+          "refId": "A"
+        },
+        {
+          "exemplar": true,
+          "expr": "max(rabbitmq_connections{cluster=\"$Cluster\", rabbitmq_cluster=\"$RabbitMQ\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "Connections",
+          "refId": "B"
+        },
+        {
+          "exemplar": true,
+          "expr": "max(rabbitmq_consumers{cluster=\"$Cluster\", rabbitmq_cluster=\"$RabbitMQ\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "Consumers",
+          "refId": "C"
+        }
+      ],
+      "title": "Channels / Connections / Consumers",
+      "type": "timeseries"
+    },
+    {
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "consumers",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 18,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "calcs": [
+            "min",
+            "max",
+            "mean",
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "exemplar": true,
+          "expr": "sum by (queue) (rabbitmq_queue_consumers{cluster=\"$Cluster\", rabbitmq_cluster=\"$RabbitMQ\"})",
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "{{queue}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Consumers by Queue",
+      "type": "timeseries"
+    },
+    {
+      "datasource": null,
+      "description": "unacked - Number of messages delivered to clients but not yet acknowledged.\n\nready - Number of messages ready to be delivered to clients.\n\ntotal - Number ready and unacknowledged messages in rabbitmq_cluster.\n",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "msg",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 18,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [
+            "min",
+            "max",
+            "mean",
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "exemplar": true,
+          "expr": "sum(rabbitmq_queue_messages_unacknowledged_global{cluster=\"$Cluster\", rabbitmq_cluster=\"$RabbitMQ\"})",
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "unacked",
+          "refId": "A"
+        },
+        {
+          "exemplar": true,
+          "expr": "sum(rabbitmq_queue_messages_ready_global{cluster=\"$Cluster\", rabbitmq_cluster=\"$RabbitMQ\"})\n",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "ready",
+          "refId": "B"
+        },
+        {
+          "exemplar": true,
+          "expr": "sum(rabbitmq_queue_messages_global{cluster=\"$Cluster\", rabbitmq_cluster=\"$RabbitMQ\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "total",
+          "refId": "C"
+        }
+      ],
+      "title": "Messages",
+      "type": "timeseries"
+    },
+    {
+      "datasource": null,
+      "description": "published - messages published\n\ndeliver - messages delivered in acknowledgement mode to consumers.\n\ndeliver no-ack - messages delivered in no-acknowledgement mode to consumers.\nacknowledgements.\n\nredelivered - messages in deliver_get which had the redelivered flag set.\n\nreturned - messages returned to publisher as unroutable.\n",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "msg / s",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 18,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [
+            "min",
+            "max",
+            "mean",
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "exemplar": true,
+          "expr": "sum(rate(rabbitmq_queue_messages_delivered_noack_total{cluster=\"$Cluster\", rabbitmq_cluster=\"$RabbitMQ\"}[1m]))",
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "deliver no-ack",
+          "refId": "A"
+        },
+        {
+          "exemplar": true,
+          "expr": "sum(rate(rabbitmq_queue_messages_delivered_total{cluster=\"$Cluster\", rabbitmq_cluster=\"$RabbitMQ\"}[1m]))",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "deliver",
+          "refId": "B"
+        },
+        {
+          "exemplar": true,
+          "expr": "sum(rate(rabbitmq_queue_messages_redelivered_total{cluster=\"$Cluster\", rabbitmq_cluster=\"$RabbitMQ\"}[1m]))",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "redelivered",
+          "refId": "C"
+        },
+        {
+          "exemplar": true,
+          "expr": "sum(rate(rabbitmq_queue_messages_published_total{cluster=\"$Cluster\", rabbitmq_cluster=\"$RabbitMQ\"}[1m]))",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "published",
+          "refId": "E"
+        },
+        {
+          "exemplar": true,
+          "expr": "sum(rate(rabbitmq_queue_messages_returned_total{cluster=\"$Cluster\", rabbitmq_cluster=\"$RabbitMQ\"}[1m]))",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "returned",
+          "refId": "D"
+        }
+      ],
+      "title": "Messages Throughput",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "datasource": null,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 19
+      },
+      "id": 9,
+      "panels": [],
+      "title": "Queues",
+      "type": "row"
+    },
+    {
+      "datasource": null,
+      "description": "unacked - Number of messages delivered to clients but not yet acknowledged.\n\nready - Number of messages ready to be delivered to clients.\n\ntotal - Number ready and unacknowledged messages in rabbitmq_cluster.\n",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "msg",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 18,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 20
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [
+            "min",
+            "max",
+            "mean",
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "repeat": "Queue",
+      "repeatDirection": "v",
+      "targets": [
+        {
+          "exemplar": true,
+          "expr": "sum(rabbitmq_queue_messages_unacknowledged{cluster=\"$Cluster\", rabbitmq_cluster=\"$RabbitMQ\", queue=\"$Queue\"})",
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "unacked",
+          "refId": "A"
+        },
+        {
+          "exemplar": true,
+          "expr": "sum(rabbitmq_queue_messages_ready{cluster=\"$Cluster\", rabbitmq_cluster=\"$RabbitMQ\", queue=\"$Queue\"})\n",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "ready",
+          "refId": "B"
+        },
+        {
+          "exemplar": true,
+          "expr": "sum(rabbitmq_queue_messages{cluster=\"$Cluster\", rabbitmq_cluster=\"$RabbitMQ\", queue=\"$Queue\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "total",
+          "refId": "C"
+        }
+      ],
+      "title": "Messages $Queue",
+      "type": "timeseries"
+    },
+    {
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "consumers",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 18,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 20
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "calcs": [
+            "min",
+            "max",
+            "mean",
+            "last"
+          ],
+          "displayMode": "hidden",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "repeat": "Queue",
+      "repeatDirection": "v",
+      "targets": [
+        {
+          "exemplar": true,
+          "expr": "sum by (queue) (rabbitmq_queue_consumers{cluster=\"$Cluster\", rabbitmq_cluster=\"$RabbitMQ\", queue=\"$Queue\"})",
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "{{queue}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Consumers $Queue",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 31,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allValue": null,
+        "current": {
+          "selected": false,
+          "text": "kube-prod",
+          "value": "kube-prod"
+        },
+        "datasource": null,
+        "definition": "label_values(kubernetes_build_info,cluster)",
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "Cluster",
+        "options": [],
+        "query": {
+          "query": "label_values(kubernetes_build_info,cluster)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": false,
+          "text": "ddo-prod-service-rabbitmq-1",
+          "value": "ddo-prod-service-rabbitmq-1"
+        },
+        "datasource": null,
+        "definition": "label_values(rabbitmq_version_info{cluster=\"$Cluster\"}, rabbitmq_cluster)",
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "RabbitMQ",
+        "options": [],
+        "query": {
+          "query": "label_values(rabbitmq_version_info{cluster=\"$Cluster\"}, rabbitmq_cluster)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": null,
+        "definition": "label_values(rabbitmq_queue_messages{cluster=\"$Cluster\", rabbitmq_cluster=\"$RabbitMQ\"}, queue)",
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": true,
+        "label": null,
+        "multi": true,
+        "name": "Queue",
+        "options": [],
+        "query": {
+          "query": "label_values(rabbitmq_queue_messages{cluster=\"$Cluster\", rabbitmq_cluster=\"$RabbitMQ\"}, queue)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
+  "timezone": "browser",
+  "title": "RabbitMQ Queues Overview",
+  "uid": "rabbitmq-queues",
+  "version": 23
+}

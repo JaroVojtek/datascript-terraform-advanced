@@ -1,0 +1,35 @@
+{
+  "ruleGroup": "node-exporter",
+  "title": "node-filesystem-almost-out-of-space-warning",
+  "condition": "B",
+  "for": "30m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "__dashboardUid__": "k8s-cluster-node",
+    "__panelId__": "202",
+    "description": "{{ if $values.B }}Filesystem on {{ $labels.device }} at {{ $labels.instance }} has only {{ printf \"%.2f\" $values.B.Value }}% available space left.{{ end }}",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/node/nodefilesystemalmostoutofspace",
+    "summary": "Filesystem has less than 5% space left."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(\n  node_filesystem_avail_bytes{job=\"node-exporter\",fstype!=\"\"} / node_filesystem_size_bytes{job=\"node-exporter\",fstype!=\"\"} * 100 \u003c 5\nand\n  node_filesystem_readonly{job=\"node-exporter\",fstype!=\"\"} == 0\n)\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

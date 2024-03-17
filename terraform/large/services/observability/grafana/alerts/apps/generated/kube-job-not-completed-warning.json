@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "kubernetes-monitoring",
+  "title": "kube-job-not-completed-warning",
+  "condition": "B",
+  "for": "5m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "description": "Job {{ $labels.namespace }}/{{ $labels.job_name }} is taking more than {{ \"43200\" | humanizeDuration }} to complete.",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubejobnotcompleted",
+    "summary": "Job did not complete in time"
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(\n  (\n    (\n      time() - max by(namespace, job_name, cluster) (kube_job_status_start_time{job=\"kube-state-metrics\"})\n    ) and (\n      kube_job_status_active{job=\"kube-state-metrics\"} \u003e 0\n    )\n  ) \u003e 43200\n) and on (cluster, namespace, job_name) kube_job_labels{label_monitoring_scope=\"apps\"}\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

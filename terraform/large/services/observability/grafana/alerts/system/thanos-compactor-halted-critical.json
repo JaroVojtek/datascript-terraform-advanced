@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "thanos-compactor",
+  "title": "thanos-compactor-halted-critical",
+  "condition": "B",
+  "for": "10m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "critical"
+  },
+  "annotations": {
+    "description": "Because of the very specific nature of Compactor which is writing to object storage, potentially deleting sensitive data, and downloading GBs of data, by default we halt Compactor on certain data failures.",
+    "summary": "Thanos compactor has been halted.",
+    "runbook_url": "https://thanos.io/tip/operating/troubleshooting.md/#overlaps"
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(sum by (cluster) (thanos_compact_halted)) > 0"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

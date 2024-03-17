@@ -1,0 +1,32 @@
+{
+  "ruleGroup": "kube-pod-container",
+  "title": "kube-pod-container-fs-usage-warning",
+  "condition": "B",
+  "noDataState": "OK",
+  "for": "30m",
+  "annotations": {
+    "description": "Pod container filesystem usage has been more than 90% of limits for longer than 30m.",
+    "summary": "Pod container filesystem usage above limit."
+  },
+  "labels": {
+    "severity": "warning"
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(container_fs_usage_bytes{container!=\"POD\",container!=\"\"} * 100 / container_fs_limit_bytes{container!=\"POD\",container!=\"\"} > 90) and on(cluster, namespace, pod) kube_pod_labels{label_monitoring_scope=\"apps\"}"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

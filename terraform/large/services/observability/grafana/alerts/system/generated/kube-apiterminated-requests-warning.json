@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "kubernetes-monitoring",
+  "title": "kube-apiterminated-requests-warning",
+  "condition": "B",
+  "for": "5m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "description": "{{ if $values.B }}The kubernetes apiserver has terminated {{ $values.B.Value | humanizePercentage }} of its incoming requests.{{ end }}",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeapiterminatedrequests",
+    "summary": "{{ if $values.B }}The kubernetes apiserver has terminated {{ $values.B.Value | humanizePercentage }} of its incoming requests.{{ end }}"
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(\n  sum by (cluster) (rate(apiserver_request_terminations_total{job=\"apiserver\"}[10m]))\n  /\n  (\n    sum by(cluster) (rate(apiserver_request_total{job=\"apiserver\"}[10m]))\n    +\n    sum by(cluster) (rate(apiserver_request_terminations_total{job=\"apiserver\"}[10m]))\n  )\n) \u003e 0.20\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

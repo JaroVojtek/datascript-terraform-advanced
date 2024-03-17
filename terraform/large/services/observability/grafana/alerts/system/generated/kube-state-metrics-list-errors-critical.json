@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "kube-state-metrics",
+  "title": "kube-state-metrics-list-errors-critical",
+  "condition": "B",
+  "for": "15m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "critical"
+  },
+  "annotations": {
+    "description": "kube-state-metrics is experiencing errors at an elevated rate in list operations. This is likely causing it to not be able to expose metrics about Kubernetes objects correctly or at all.",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/kube-state-metrics/kubestatemetricslisterrors",
+    "summary": "kube-state-metrics is experiencing errors in list operations."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(\n  sum by (cluster) (rate(kube_state_metrics_list_total{job=\"kube-state-metrics\",result=\"error\"}[5m]))\n  /\n  sum by (cluster) (rate(kube_state_metrics_list_total{job=\"kube-state-metrics\"}[5m]))\n) \u003e 0.01\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

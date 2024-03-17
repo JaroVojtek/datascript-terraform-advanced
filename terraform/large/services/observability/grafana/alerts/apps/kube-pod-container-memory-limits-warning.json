@@ -1,0 +1,34 @@
+{
+  "ruleGroup": "kube-pod-container",
+  "title": "kube-pod-container-memory-limits-warning",
+  "condition": "B",
+  "noDataState": "OK",
+  "for": "10m",
+  "annotations": {
+    "description": "Pod container memory usage has been utilized more than 95% of memory limits for longer than 10m.",
+    "summary": "Pod container memory limits should be increased.",
+    "__dashboardUid__": "k8s-container",
+    "__panelId__": 23
+  },
+  "labels": {
+    "severity": "warning"
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "((container_memory_working_set_bytes{container!=\"POD\",container!=\"\"} * 100 / on (cluster, namespace, pod, container) group_left kube_pod_container_resource_limits{container!=\"POD\",container!=\"\",resource=\"memory\",unit=\"byte\"}) > 95) and on(cluster, namespace, pod) kube_pod_labels{label_monitoring_scope=\"apps\"}"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

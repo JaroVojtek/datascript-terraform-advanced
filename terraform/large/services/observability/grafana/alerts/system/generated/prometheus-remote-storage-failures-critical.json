@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "prometheus-k8s-prometheus",
+  "title": "prometheus-remote-storage-failures-critical",
+  "condition": "B",
+  "for": "15m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "critical"
+  },
+  "annotations": {
+    "description": "{{ if $values.B }}Prometheus {{$labels.namespace}}/{{$labels.pod}} failed to send {{ printf \"%.1f\" $values.B.Value }}% of the samples to {{ $labels.remote_name}}:{{ $labels.url }}{{ end }}",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheusremotestoragefailures",
+    "summary": "Prometheus fails to send samples to remote storage."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(\n  (rate(prometheus_remote_storage_failed_samples_total{job=\"prometheus-k8s\",namespace=\"monitoring\"}[5m]) or rate(prometheus_remote_storage_samples_failed_total{job=\"prometheus-k8s\",namespace=\"monitoring\"}[5m]))\n/\n  (\n    (rate(prometheus_remote_storage_failed_samples_total{job=\"prometheus-k8s\",namespace=\"monitoring\"}[5m]) or rate(prometheus_remote_storage_samples_failed_total{job=\"prometheus-k8s\",namespace=\"monitoring\"}[5m]))\n  +\n    (rate(prometheus_remote_storage_succeeded_samples_total{job=\"prometheus-k8s\",namespace=\"monitoring\"}[5m]) or rate(prometheus_remote_storage_samples_total{job=\"prometheus-k8s\",namespace=\"monitoring\"}[5m]))\n  )\n)\n* 100\n\u003e 1\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

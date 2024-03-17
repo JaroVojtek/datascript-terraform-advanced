@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "kubernetes-monitoring",
+  "title": "kube-daemon-set-rollout-stuck-warning",
+  "condition": "B",
+  "for": "15m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "description": "DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset }} has not finished or progressed for at least 15 minutes.",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubedaemonsetrolloutstuck",
+    "summary": "DaemonSet rollout is stuck."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(\n  (\n    (\n      kube_daemonset_status_current_number_scheduled{job=\"kube-state-metrics\"} != kube_daemonset_status_desired_number_scheduled{job=\"kube-state-metrics\"}\n    ) or (\n      kube_daemonset_status_number_misscheduled{job=\"kube-state-metrics\"} != 0\n    ) or (\n      kube_daemonset_status_updated_number_scheduled{job=\"kube-state-metrics\"} != kube_daemonset_status_desired_number_scheduled{job=\"kube-state-metrics\"}\n    ) or (\n      kube_daemonset_status_number_available{job=\"kube-state-metrics\"} != kube_daemonset_status_desired_number_scheduled{job=\"kube-state-metrics\"}\n    )\n  ) and (\n    changes(kube_daemonset_status_updated_number_scheduled{job=\"kube-state-metrics\"}[5m]) == 0\n  )\n) and on (cluster, namespace, daemonset) kube_daemonset_labels{label_monitoring_scope=\"system\"}\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

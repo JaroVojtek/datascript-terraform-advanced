@@ -1,0 +1,136 @@
+{
+  "id": 638,
+  "uid": "cert-manager-cert-expiry-soon-warning",
+  "orgID": 1,
+  "folderUID": "system",
+  "ruleGroup": "cert-manager",
+  "title": "cert-manager-cert-expiry-soon-warning",
+  "condition": "C",
+  "data": [
+    {
+      "refId": "A",
+      "queryType": "",
+      "relativeTimeRange": {
+        "from": 3600,
+        "to": 0
+      },
+      "datasourceUid": "thanos",
+      "model": {
+        "editorMode": "code",
+        "expr": "avg by (cluster, exported_namespace, namespace, name) (certmanager_certificate_expiration_timestamp_seconds - time())",
+        "hide": false,
+        "intervalMs": 1000,
+        "legendFormat": "__auto",
+        "maxDataPoints": 43200,
+        "range": true,
+        "refId": "A"
+      }
+    },
+    {
+      "refId": "B",
+      "queryType": "",
+      "relativeTimeRange": {
+        "from": 3600,
+        "to": 0
+      },
+      "datasourceUid": "-100",
+      "model": {
+        "conditions": [
+          {
+            "evaluator": {
+              "params": [
+                null,
+                0
+              ],
+              "type": "gt"
+            },
+            "operator": {
+              "type": "and"
+            },
+            "query": {
+              "params": []
+            },
+            "reducer": {
+              "params": [],
+              "type": "avg"
+            },
+            "type": "query"
+          }
+        ],
+        "datasource": {
+          "name": "Expression",
+          "type": "__expr__",
+          "uid": "__expr__"
+        },
+        "downsampler": "mean",
+        "expression": "A",
+        "hide": false,
+        "intervalMs": 1000,
+        "maxDataPoints": 43200,
+        "reducer": "last",
+        "refId": "B",
+        "type": "reduce",
+        "upsampler": "fillna"
+      }
+    },
+    {
+      "refId": "C",
+      "queryType": "",
+      "relativeTimeRange": {
+        "from": 600,
+        "to": 0
+      },
+      "datasourceUid": "-100",
+      "model": {
+        "conditions": [
+          {
+            "evaluator": {
+              "params": [
+                0,
+                0
+              ],
+              "type": "gt"
+            },
+            "operator": {
+              "type": "and"
+            },
+            "query": {
+              "params": [
+                "B"
+              ]
+            },
+            "reducer": {
+              "params": [],
+              "type": "avg"
+            },
+            "type": "query"
+          }
+        ],
+        "datasource": {
+          "name": "Expression",
+          "type": "__expr__",
+          "uid": "__expr__"
+        },
+        "expression": "$B < (21 * 24 * 3600)",
+        "hide": false,
+        "intervalMs": 1000,
+        "maxDataPoints": 43200,
+        "refId": "C",
+        "type": "math"
+      }
+    }
+  ],
+  "updated": "2023-02-08T22:13:40Z",
+  "noDataState": "NoData",
+  "execErrState": "Error",
+  "for": "5m",
+  "annotations": {
+    "__dashboardUid__": "cert-manager",
+    "__panelId__": "15",
+    "description": "{{ if $values.B }}The domain this cert covers will be unavailable after {{ $values.B.Value | humanizeDuration }}. Clients using endpoints that this cert protects will start to fail in {{ $values.B.Value | humanizeDuration }}.{{ end }}",
+    "summary": "{{ if $values.B }} The cert `{{ $labels.name }}` is {{ $values.B.Value | humanizeDuration }} from expiry, it should have renewed over a week ago.{{ end }}"
+  },
+  "labels": {
+    "severity": "warning"
+  }
+}

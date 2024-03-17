@@ -1,0 +1,34 @@
+{
+  "ruleGroup": "kube-pod-container",
+  "title": "kube-pod-container-image-pull-back-off-warning",
+  "condition": "B",
+  "noDataState": "OK",
+  "for": "10m",
+  "annotations": {
+    "description": "Pod container has an {{ $labels.reason }} for longer than 10m.",
+    "summary": "Container image pull failed, kubelet is backing off image pull.",
+    "__dashboardUid__": "k8s-container",
+    "__panelId__": 25
+  },
+  "labels": {
+    "severity": "warning"
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(kube_pod_container_status_waiting_reason{reason=\"ImagePullBackOff\"} > 0) and on(cluster, namespace, pod) kube_pod_labels{label_monitoring_scope=\"apps\"}"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

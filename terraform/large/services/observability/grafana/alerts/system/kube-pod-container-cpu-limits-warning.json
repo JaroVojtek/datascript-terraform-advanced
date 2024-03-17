@@ -1,0 +1,34 @@
+{
+  "ruleGroup": "kube-pod-container",
+  "title": "kube-pod-container-cpu-limits-warning",
+  "condition": "B",
+  "noDataState": "OK",
+  "for": "10m",
+  "annotations": {
+    "description": "Pod container CPU usage has been utilized more than 95% of CPU limits for longer than 10m.",
+    "summary": "Pod container CPU limits should be increased.",
+    "__dashboardUid__": "k8s-container",
+    "__panelId__": 21
+  },
+  "labels": {
+    "severity": "warning"
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "((rate(container_cpu_user_seconds_total{container!=\"POD\",container!=\"\"}[5m]) * 100 / on (cluster, namespace, pod, container) group_left kube_pod_container_resource_limits{container!=\"POD\",container!=\"\",resource=\"cpu\",unit=\"core\"}) > 95) and on(cluster, namespace, pod) kube_pod_labels{label_monitoring_scope=\"system\"}"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

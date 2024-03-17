@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "node-exporter",
+  "title": "node-text-file-collector-scrape-error-warning",
+  "condition": "B",
+  "for": "5m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "description": "Node Exporter text file collector failed to scrape.",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/node/nodetextfilecollectorscrapeerror",
+    "summary": "Node Exporter text file collector failed to scrape."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "node_textfile_scrape_error{job=\"node-exporter\"} == 1\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

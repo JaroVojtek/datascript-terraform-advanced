@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "kubernetes-monitoring",
+  "title": "kubelet-down-critical",
+  "condition": "B",
+  "for": "15m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "critical"
+  },
+  "annotations": {
+    "description": "Kubelet has disappeared from Prometheus target discovery.",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeletdown",
+    "summary": "Target disappeared from Prometheus target discovery."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "absent(up{job=\"kubelet\", metrics_path=\"/metrics\"} == 1)\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "kubernetes-monitoring",
+  "title": "kube-cpuquota-overcommit-warning",
+  "condition": "B",
+  "for": "5m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "description": "Cluster has overcommitted CPU resource requests for Namespaces.",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubecpuquotaovercommit",
+    "summary": "Cluster has overcommitted CPU resource requests."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(\n  sum by (cluster, namespace) (min without(resource) (kube_resourcequota{job=\"kube-state-metrics\", type=\"hard\", resource=~\"(cpu|requests.cpu)\"}))\n  /\n  sum by (cluster, namespace) (kube_node_status_allocatable{resource=\"cpu\", job=\"kube-state-metrics\"})\n) \u003e 1.5\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

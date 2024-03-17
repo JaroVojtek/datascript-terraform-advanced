@@ -1,0 +1,34 @@
+{
+  "ruleGroup": "kube-pod-container",
+  "title": "kube-pod-container-memory-requests-warning",
+  "condition": "B",
+  "noDataState": "OK",
+  "for": "30m",
+  "annotations": {
+    "description": "Pod container memory usage has been 150% over memory requests for longer than 30m.",
+    "summary": "Pod container memory requests should be increased.",
+    "__dashboardUid__": "k8s-container",
+    "__panelId__": 22
+  },
+  "labels": {
+    "severity": "warning"
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "((container_memory_working_set_bytes{container!=\"POD\",container!=\"\"} * 100 / on (cluster, namespace, pod, container) group_left kube_pod_container_resource_requests{container!=\"POD\",container!=\"\",resource=\"memory\",unit=\"byte\"}) > 150) and on(cluster, namespace, pod) kube_pod_labels{label_monitoring_scope=\"system\"}"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

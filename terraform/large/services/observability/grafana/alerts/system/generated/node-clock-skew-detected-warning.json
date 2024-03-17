@@ -1,0 +1,35 @@
+{
+  "ruleGroup": "node-exporter",
+  "title": "node-clock-skew-detected-warning",
+  "condition": "B",
+  "for": "10m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "__dashboardUid__": "k8s-cluster-node",
+    "__panelId__": "270",
+    "description": "Clock on {{ $labels.instance }} is out of sync by more than 300s. Ensure NTP is configured correctly on this host.",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/node/nodeclockskewdetected",
+    "summary": "Clock skew detected."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(\n  node_timex_offset_seconds{job=\"node-exporter\"} \u003e 0.05\nand\n  deriv(node_timex_offset_seconds{job=\"node-exporter\"}[5m]) \u003e= 0\n)\nor\n(\n  node_timex_offset_seconds{job=\"node-exporter\"} \u003c -0.05\nand\n  deriv(node_timex_offset_seconds{job=\"node-exporter\"}[5m]) \u003c= 0\n)\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

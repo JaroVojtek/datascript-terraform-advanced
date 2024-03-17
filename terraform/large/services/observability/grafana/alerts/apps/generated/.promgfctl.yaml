@@ -1,0 +1,205 @@
+alerts:
+  - name: kubernetes-control-plane
+    url: https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/v0.12.0/manifests/kubernetesControlPlane-prometheusRule.yaml
+    groups:
+      - name: kubernetes-apps
+        rules:
+          - name: KubePodCrashLooping
+            patch:
+              expr: |
+                (
+                  max_over_time(kube_pod_container_status_waiting_reason{reason="CrashLoopBackOff", job="kube-state-metrics"}[5m]) >= 1
+                ) and on (cluster, namespace, pod, container) kube_pod_labels{label_monitoring_scope="apps"}
+          - name: KubePodNotReady
+            patch:
+              expr: |
+                (
+                  sum by (cluster, namespace, pod) (
+                    max by (cluster, namespace, pod) (kube_pod_status_phase{job="kube-state-metrics", phase=~"Pending|Unknown|Failed"})
+                    * on (cluster, namespace, pod) group_left(owner_kind) topk by(namespace, pod, cluster) (1, max by(namespace, pod, owner_kind, cluster) (kube_pod_owner{owner_kind!="Job"}))
+                  ) > 0
+                ) and on (cluster, namespace, pod) kube_pod_labels{label_monitoring_scope="apps"}
+          - name: KubeContainerWaiting
+            patch:
+              expr: |
+                (
+                  kube_pod_container_status_waiting_reason{reason="ContainerCreating"} > 0
+                ) and on (cluster, namespace, pod, container) kube_pod_labels{label_monitoring_scope="apps"}
+          - name: KubeDeploymentGenerationMismatch
+            patch:
+              expr: |
+                (
+                  kube_deployment_status_observed_generation{job="kube-state-metrics"} != kube_deployment_metadata_generation{job="kube-state-metrics"}
+                ) and on (cluster, namespace, deployment) kube_deployment_labels{label_monitoring_scope="apps"}
+          - name: KubeDeploymentReplicasMismatch
+            patch:
+              expr: |
+                (
+                  (
+                    kube_deployment_spec_replicas{job="kube-state-metrics"} > kube_deployment_status_replicas_available{job="kube-state-metrics"}
+                  ) and (
+                    changes(kube_deployment_status_replicas_updated{job="kube-state-metrics"}[10m]) ==  0
+                  )
+                ) and on (cluster, namespace, deployment) kube_deployment_labels{label_monitoring_scope="apps"}
+          - name: KubeStatefulSetReplicasMismatch
+            patch:
+              expr: |
+                (
+                  (
+                    kube_statefulset_status_replicas_ready{job="kube-state-metrics"} != kube_statefulset_status_replicas{job="kube-state-metrics"}
+                  ) and (
+                    changes(kube_statefulset_status_replicas_updated{job="kube-state-metrics"}[10m]) == 0
+                  )
+                ) and on (cluster, namespace, statefulset) kube_statefulset_labels{label_monitoring_scope="apps"}
+          - name: KubeStatefulSetGenerationMismatch
+            patch:
+              expr: |
+                (
+                  kube_statefulset_status_observed_generation{job="kube-state-metrics"} != kube_statefulset_metadata_generation{job="kube-state-metrics"}
+                ) and on (cluster, namespace, statefulset) kube_statefulset_labels{label_monitoring_scope="apps"}
+          - name: KubeStatefulSetUpdateNotRolledOut
+            patch:
+              expr: |
+                (
+                  (
+                    max without (revision) (kube_statefulset_status_current_revision{job="kube-state-metrics"} unless kube_statefulset_status_update_revision{job="kube-state-metrics"})
+                    * (
+                      kube_statefulset_replicas{job="kube-state-metrics"} != kube_statefulset_status_replicas_updated{job="kube-state-metrics"}
+                    )
+                  ) and (
+                    changes(kube_statefulset_status_replicas_updated{job="kube-state-metrics"}[5m]) == 0
+                  )
+                ) and on (cluster, namespace, statefulset) kube_statefulset_labels{label_monitoring_scope="apps"}
+          - name: KubeDaemonSetRolloutStuck
+            enabled: false
+          - name: KubeDaemonSetNotScheduled
+            enabled: false
+          - name: KubeDaemonSetMisScheduled
+            enabled: false
+          - name: KubeJobNotCompleted
+            patch:
+              expr: |
+                (
+                  (
+                    (
+                      time() - max by(namespace, job_name, cluster) (kube_job_status_start_time{job="kube-state-metrics"})
+                    ) and (
+                      kube_job_status_active{job="kube-state-metrics"} > 0
+                    )
+                  ) > 43200
+                ) and on (cluster, namespace, job_name) kube_job_labels{label_monitoring_scope="apps"}
+          - name: KubeJobFailed
+            enabled: false
+          - name: KubeHpaReplicasMismatch
+            patch:
+              expr: |
+                (
+                  (
+                    kube_horizontalpodautoscaler_status_desired_replicas{job="kube-state-metrics"} != kube_horizontalpodautoscaler_status_current_replicas{job="kube-state-metrics"}
+                  ) and (
+                    kube_horizontalpodautoscaler_status_current_replicas{job="kube-state-metrics"} > kube_horizontalpodautoscaler_spec_min_replicas{job="kube-state-metrics"}
+                  ) and (
+                    kube_horizontalpodautoscaler_status_current_replicas{job="kube-state-metrics"} < kube_horizontalpodautoscaler_spec_max_replicas{job="kube-state-metrics"}
+                  ) and (
+                    changes(kube_horizontalpodautoscaler_status_current_replicas{job="kube-state-metrics"}[15m]) == 0
+                  )
+                ) and on (cluster, namespace, horizontalpodautoscaler) kube_horizontalpodautoscaler_labels{label_monitoring_scope="apps"}
+          - name: KubeHpaMaxedOut
+            patch:
+              expr: |
+                (
+                  kube_horizontalpodautoscaler_status_current_replicas{job="kube-state-metrics"} == kube_horizontalpodautoscaler_spec_max_replicas{job="kube-state-metrics"}
+                ) and on (cluster, namespace, horizontalpodautoscaler) kube_horizontalpodautoscaler_labels{label_monitoring_scope="apps"}
+          - name: KubePersistentVolumeErrors
+            enabled: false
+          - name: KubePersistentVolumeFillingUp
+            labels:
+              severity: critical
+            patch:
+              expr: |
+                (
+                  (
+                    (
+                      kubelet_volume_stats_available_bytes{job="kubelet", metrics_path="/metrics"}
+                      /
+                      kubelet_volume_stats_capacity_bytes{job="kubelet", metrics_path="/metrics"}
+                    ) < 0.03
+                  ) and (
+                    kubelet_volume_stats_used_bytes{job="kubelet", metrics_path="/metrics"} > 0
+                  )
+                  unless on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_access_mode{access_mode="ReadOnlyMany"} == 1
+                  unless on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_labels{label_excluded_from_alerts="true"} == 1
+                ) and on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_labels{label_monitoring_scope="apps"}
+          - name: KubePersistentVolumeFillingUp
+            labels:
+              severity: warning
+            patch:
+              expr: |
+                (
+                  (
+                    (
+                      kubelet_volume_stats_available_bytes{job="kubelet", metrics_path="/metrics"}
+                      /
+                      kubelet_volume_stats_capacity_bytes{job="kubelet", metrics_path="/metrics"}
+                    ) < 0.15
+                  ) and (
+                    kubelet_volume_stats_used_bytes{job="kubelet", metrics_path="/metrics"} > 0
+                  ) and (
+                    predict_linear(kubelet_volume_stats_available_bytes{job="kubelet", metrics_path="/metrics"}[6h], 4 * 24 * 3600) < 0
+                  )
+                  unless on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_access_mode{access_mode="ReadOnlyMany"} == 1
+                  unless on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_labels{label_excluded_from_alerts="true"} == 1
+                ) and on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_labels{label_monitoring_scope="apps"}
+          - name: KubePersistentVolumeInodesFillingUp
+            labels:
+              severity: critical
+            patch:
+              expr: |
+                (
+                  (
+                    (
+                      kubelet_volume_stats_inodes_free{job="kubelet", metrics_path="/metrics"}
+                      /
+                      kubelet_volume_stats_inodes_free{job="kubelet", metrics_path="/metrics"}
+                    ) < 0.03
+                  ) and (
+                    kubelet_volume_stats_inodes_used{job="kubelet", metrics_path="/metrics"} > 0
+                  )
+                  unless on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_access_mode{access_mode="ReadOnlyMany"} == 1
+                  unless on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_labels{label_excluded_from_alerts="true"} == 1
+                ) and on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_labels{label_monitoring_scope="apps"}
+          - name: KubePersistentVolumeInodesFillingUp
+            labels:
+              severity: warning
+            patch:
+              expr: |
+                (
+                  (
+                    (
+                      kubelet_volume_stats_inodes_free{job="kubelet", metrics_path="/metrics"}
+                      /
+                      kubelet_volume_stats_inodes_free{job="kubelet", metrics_path="/metrics"}
+                    ) < 0.15
+                  ) and (
+                    kubelet_volume_stats_inodes_used{job="kubelet", metrics_path="/metrics"} > 0
+                  ) and (
+                    predict_linear(kubelet_volume_stats_inodes_free{job="kubelet", metrics_path="/metrics"}[6h], 4 * 24 * 3600) < 0
+                  )
+                  unless on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_access_mode{access_mode="ReadOnlyMany"} == 1
+                  unless on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_labels{label_excluded_from_alerts="true"} == 1
+                ) and on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_labels{label_monitoring_scope="apps"}
+
+      - name: kubernetes-resources
+        enabled: false
+      - name: kubernetes-system
+        enabled: false
+      - name: kube-apiserver-slos
+        enabled: false
+      - name: kubernetes-system-apiserver
+        enabled: false
+      - name: kubernetes-system-kubelet
+        enabled: false
+      - name: kubernetes-system-scheduler
+        enabled: false
+      - name: kubernetes-system-controller-manager
+        enabled: false

@@ -1,0 +1,35 @@
+{
+  "ruleGroup": "node-exporter",
+  "title": "node-network-transmit-errs-warning",
+  "condition": "B",
+  "for": "1h",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "__dashboardUid__": "k8s-cluster-node",
+    "__panelId__": "238",
+    "description": "{{ if $values.B }}{{ $labels.instance }} interface {{ $labels.device }} has encountered {{ printf \"%.0f\" $values.B.Value }} transmit errors in the last two minutes.{{ end }}",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/node/nodenetworktransmiterrs",
+    "summary": "Network interface is reporting many transmit errors."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "rate(node_network_transmit_errs_total[2m]) / rate(node_network_transmit_packets_total[2m]) \u003e 0.01\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

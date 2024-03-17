@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "prometheus-operator",
+  "title": "prometheus-operator-reconcile-errors-warning",
+  "condition": "B",
+  "for": "10m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "description": "{{ if $values.B }}{{ $values.B.Value | humanizePercentage }} of reconciling operations failed for {{ $labels.controller }} controller in {{ $labels.namespace }} namespace.{{ end }}",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/prometheus-operator/prometheusoperatorreconcileerrors",
+    "summary": "Errors while reconciling controller."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(\n  sum by (controller,namespace,cluster) (rate(prometheus_operator_reconcile_errors_total{job=\"prometheus-operator\",namespace=\"monitoring\"}[5m]))\n  /\n  sum by (controller,namespace,cluster) (rate(prometheus_operator_reconcile_operations_total{job=\"prometheus-operator\",namespace=\"monitoring\"}[5m]))\n) \u003e 0.1\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

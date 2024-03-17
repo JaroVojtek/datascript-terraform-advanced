@@ -1,0 +1,35 @@
+{
+  "ruleGroup": "node-exporter",
+  "title": "node-filesystem-files-filling-up-warning",
+  "condition": "B",
+  "for": "1h",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "__dashboardUid__": "k8s-cluster-node",
+    "__panelId__": "206",
+    "description": "{{ if $values.B }}Filesystem on {{ $labels.device }} at {{ $labels.instance }} has only {{ printf \"%.2f\" $values.B.Value }}% available inodes left and is filling up.{{ end }}",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/node/nodefilesystemfilesfillingup",
+    "summary": "Filesystem is predicted to run out of inodes within the next 24 hours."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(\n  node_filesystem_files_free{job=\"node-exporter\",fstype!=\"\"} / node_filesystem_files{job=\"node-exporter\",fstype!=\"\"} * 100 \u003c 40\nand\n  predict_linear(node_filesystem_files_free{job=\"node-exporter\",fstype!=\"\"}[6h], 24*60*60) \u003c 0\nand\n  node_filesystem_readonly{job=\"node-exporter\",fstype!=\"\"} == 0\n)\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

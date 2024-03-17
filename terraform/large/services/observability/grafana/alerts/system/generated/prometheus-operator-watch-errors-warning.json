@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "prometheus-operator",
+  "title": "prometheus-operator-watch-errors-warning",
+  "condition": "B",
+  "for": "15m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "description": "Errors while performing watch operations in controller {{$labels.controller}} in {{$labels.namespace}} namespace.",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/prometheus-operator/prometheusoperatorwatcherrors",
+    "summary": "Errors while performing watch operations in controller."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(\n  sum by (controller,namespace,cluster) (rate(prometheus_operator_watch_operations_failed_total{job=\"prometheus-operator\",namespace=\"monitoring\"}[5m]))\n  /\n  sum by (controller,namespace,cluster) (rate(prometheus_operator_watch_operations_total{job=\"prometheus-operator\",namespace=\"monitoring\"}[5m]))\n) \u003e 0.4\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

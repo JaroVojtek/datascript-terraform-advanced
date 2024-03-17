@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "kube-prometheus",
+  "title": "node-network-interface-flapping-warning",
+  "condition": "B",
+  "for": "2m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "description": "Network interface \"{{ $labels.device }}\" changing its up status often on node-exporter {{ $labels.namespace }}/{{ $labels.pod }}",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/general/nodenetworkinterfaceflapping",
+    "summary": "Network interface is often changing its status"
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "changes(node_network_up{job=\"node-exporter\",device!~\"veth.+\"}[2m]) \u003e 2\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

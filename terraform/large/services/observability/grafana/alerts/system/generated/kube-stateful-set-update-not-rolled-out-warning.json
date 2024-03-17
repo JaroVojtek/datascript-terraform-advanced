@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "kubernetes-monitoring",
+  "title": "kube-stateful-set-update-not-rolled-out-warning",
+  "condition": "B",
+  "for": "15m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "description": "StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} update has not been rolled out.",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubestatefulsetupdatenotrolledout",
+    "summary": "StatefulSet update has not been rolled out."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(\n  (\n    max without (revision) (kube_statefulset_status_current_revision{job=\"kube-state-metrics\"} unless kube_statefulset_status_update_revision{job=\"kube-state-metrics\"})\n    * (\n      kube_statefulset_replicas{job=\"kube-state-metrics\"} != kube_statefulset_status_replicas_updated{job=\"kube-state-metrics\"}\n    )\n  ) and (\n    changes(kube_statefulset_status_replicas_updated{job=\"kube-state-metrics\"}[5m]) == 0\n  )\n) and on (cluster, namespace, statefulset) kube_statefulset_labels{label_monitoring_scope=\"system\"}\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

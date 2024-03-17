@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "kubernetes-monitoring",
+  "title": "kube-cpuovercommit-warning",
+  "condition": "B",
+  "for": "10m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "description": "{{ if $values.B }}Cluster has overcommitted CPU resource requests for Pods by {{ $values.B.Value }} CPU shares and cannot tolerate node failure.{{ end }}",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubecpuovercommit",
+    "summary": "Cluster has overcommitted CPU resource requests."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(\n  sum by (cluster, namespace) (namespace_cpu:kube_pod_container_resource_requests:sum{}) - (sum by (cluster) (kube_node_status_allocatable{resource=\"cpu\"}) - max by (cluster) (kube_node_status_allocatable{resource=\"cpu\"})\n) \u003e 0\nand\n(\n  sum by (cluster, namespace) (kube_node_status_allocatable{resource=\"cpu\"}) - max by (cluster) (kube_node_status_allocatable{resource=\"cpu\"}))\n) \u003e 0\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

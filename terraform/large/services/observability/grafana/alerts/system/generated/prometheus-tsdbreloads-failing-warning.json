@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "prometheus-k8s-prometheus",
+  "title": "prometheus-tsdbreloads-failing-warning",
+  "condition": "B",
+  "for": "4h",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "description": "{{ if $values.B }}Prometheus {{$labels.namespace}}/{{$labels.pod}} has detected {{$values.B.Value | humanize}} reload failures over the last 3h.{{ end }}",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheustsdbreloadsfailing",
+    "summary": "Prometheus has issues reloading blocks from disk."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "increase(prometheus_tsdb_reloads_failures_total{job=\"prometheus-k8s\",namespace=\"monitoring\"}[3h]) \u003e 0\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

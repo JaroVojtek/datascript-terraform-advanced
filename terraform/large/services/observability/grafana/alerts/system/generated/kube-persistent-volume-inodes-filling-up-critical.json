@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "kubernetes-monitoring",
+  "title": "kube-persistent-volume-inodes-filling-up-critical",
+  "condition": "B",
+  "for": "1m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "critical"
+  },
+  "annotations": {
+    "description": "{{ if $values.B }}The PersistentVolume claimed by {{ $labels.persistentvolumeclaim }} in Namespace {{ $labels.namespace }} only has {{ $values.B.Value | humanizePercentage }} free inodes.{{ end }}",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubepersistentvolumeinodesfillingup",
+    "summary": "PersistentVolumeInodes are filling up."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(\n  (\n    (\n      kubelet_volume_stats_inodes_free{job=\"kubelet\", metrics_path=\"/metrics\"}\n      /\n      kubelet_volume_stats_inodes_free{job=\"kubelet\", metrics_path=\"/metrics\"}\n    ) \u003c 0.03\n  ) and (\n    kubelet_volume_stats_inodes_used{job=\"kubelet\", metrics_path=\"/metrics\"} \u003e 0\n  )\n  unless on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_access_mode{access_mode=\"ReadOnlyMany\"} == 1\n  unless on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_labels{label_excluded_from_alerts=\"true\"} == 1\n) and on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_labels{label_monitoring_scope=\"system\"}\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}

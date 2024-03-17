@@ -1,0 +1,33 @@
+{
+  "ruleGroup": "kubernetes-monitoring",
+  "title": "kube-hpa-replicas-mismatch-warning",
+  "condition": "B",
+  "for": "15m",
+  "noDataState": "OK",
+  "labels": {
+    "severity": "warning"
+  },
+  "annotations": {
+    "description": "HPA {{ $labels.namespace }}/{{ $labels.horizontalpodautoscaler  }} has not matched the desired number of replicas for longer than 15 minutes.",
+    "runbook_url": "https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubehpareplicasmismatch",
+    "summary": "HPA has not matched desired number of replicas."
+  },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "thanos",
+      "model": {
+        "expr": "(\n  (\n    kube_horizontalpodautoscaler_status_desired_replicas{job=\"kube-state-metrics\"} != kube_horizontalpodautoscaler_status_current_replicas{job=\"kube-state-metrics\"}\n  ) and (\n    kube_horizontalpodautoscaler_status_current_replicas{job=\"kube-state-metrics\"} \u003e kube_horizontalpodautoscaler_spec_min_replicas{job=\"kube-state-metrics\"}\n  ) and (\n    kube_horizontalpodautoscaler_status_current_replicas{job=\"kube-state-metrics\"} \u003c kube_horizontalpodautoscaler_spec_max_replicas{job=\"kube-state-metrics\"}\n  ) and (\n    changes(kube_horizontalpodautoscaler_status_current_replicas{job=\"kube-state-metrics\"}[15m]) == 0\n  )\n) and on (cluster, namespace, horizontalpodautoscaler) kube_horizontalpodautoscaler_labels{label_monitoring_scope=\"system\"}\n"
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "-100",
+      "model": {
+        "type": "reduce",
+        "reducer": "last",
+        "expression": "A"
+      }
+    }
+  ]
+}
